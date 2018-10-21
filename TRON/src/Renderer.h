@@ -20,4 +20,6 @@ class Renderer
 public:
 	void Clear();
 	void Draw(const VertexArray& va,/* const IndexBuffer& ib, */const Shader& shader, const int& size) const;
+	void DrawLines(const VertexArray& va, /*const IndexBuffer& ib, */const Shader& shader, const int& size) const;
+	void DrawLineStrip(const VertexArray& va, /*const IndexBuffer& ib, */const Shader& shader, const int& size) const;
 };

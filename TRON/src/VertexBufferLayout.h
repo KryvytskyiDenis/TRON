@@ -3,7 +3,7 @@
 #include <vector>
 #include "Renderer.h"
 
-// Element is a Vertex Attribute (I think)
+// Element is a Vertex Attribute
 struct VertexBufferElement
 {
 	unsigned int type;
@@ -23,6 +23,7 @@ struct VertexBufferElement
 	}
 };
 
+// Layout for data
 class VertexBufferLayout
 {
 private:

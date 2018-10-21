@@ -6,7 +6,7 @@ class Grid
 {
 private:
 	std::vector<float> m_Positions;
-	float m_Stride;			// one cell's size of the grid by height
+	float m_Stride;			// one cell's size of the grid
 	unsigned int m_Width;	// The width of the window
 	unsigned int m_Height;  // The height of the window
 	bool m_LinesMode;			// Mode of lines positions generation: true - horizontal, false - vertical

@@ -18,7 +18,7 @@ void VertexArray::AddBuffer(const VertexBuffer & vb, const VertexBufferLayout & 
 	Bind();
 	vb.Bind(); // Bind an actual layout
 
-			   // Set up layout for above bounded buffer
+	// Set up layout for above bounded buffer
 	const auto& elements = layout.GetElements(); // const auto& - read-only access
 	unsigned int offset = 0;
 	for (unsigned int i = 0; i < elements.size(); i++)
