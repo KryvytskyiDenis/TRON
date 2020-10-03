@@ -1,5 +1,5 @@
 # TRON
-2D OpenGL Renderer and simple game on top of this
+OpenGL 2D Renderer and simple game on top of this
 
 ## Getting started
 
