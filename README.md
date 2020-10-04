@@ -15,6 +15,6 @@ git clone --recursive https://github.com/kryvytskyidenys/TRON
 
 ## Features
 
-- OpenGL 2d renderer
 - Sprite Renderer
-- Shaders Manager
+- Batch Renderer
+- Logger with OpenGL severity
