@@ -1,6 +1,0 @@
-[submodule "Tron/dependencies/GLFW"]
-	path = Tron/dependencies/GLFW
-	url = https://github.com/kryvytskyidenys/glfw
-[submodule "Tron/dependencies/glm"]
-	path = Tron/dependencies/glm
-	url = https://github.com/g-truc/glm
