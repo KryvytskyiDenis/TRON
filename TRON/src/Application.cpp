@@ -1,176 +1,234 @@
-#include <GL/glew.h>
+#include "trpch.h"
+
+#include "Renderer/VertexBuffer.h"
+#include "Renderer/VertexBufferLayout.h"
+#include "Renderer/IndexBuffer.h"
+#include "Renderer/VertexArray.h"
+
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
-#include "Renderer.h"
-
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-
-#include "Shader.h"
-
-#include "Grid.h"
-
-
-struct ColorRGBA {
-	float r;
-	float g;
-	float b;
-	float alpha;
+struct ShaderProgramSource
+{
+    std::string VertexSource;
+    std::string FragmentSource;
 };
 
-void RenderItem(VertexArray& va, Shader& shader, const VertexBuffer& vb, const VertexBufferLayout& vbl, const ColorRGBA& color);
-
-int main(void)
+static std::string ReadFile(const std::string& filepath)
 {
-	GLFWwindow* window;
+    std::string result;
+    std::ifstream in(filepath, std::ios::in || std::ios::binary);
+    if (in)
+    {
+        in.seekg(0, in.end);
+        result.resize(in.tellg());
+        in.seekg(0, in.beg);
+        in.read(&result[0], result.size());
+        in.close();
+    }
+    else
+    {
+        std::cout << "Could not open file " << filepath << std::endl;
+        TR_ASSERT(false);
+    }
 
-	/* Initialize the library */
-	if (!glfwInit())
-		return -1;
-
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-	/* Create a windowed mode window and its OpenGL context */
-	unsigned int winWidth = 1920;
-	unsigned int winHeight = 1080;
-
-	window = glfwCreateWindow(winWidth, winHeight, "TRON", NULL, NULL);
-	
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-
-	glfwSwapInterval(1); // vsync
-
-	if (glewInit() != GLEW_OK)
-		std::cout << "Error!" << std::endl;
-
-	std::cout << glGetString(GL_VERSION) << std::endl;
-
-	{
-		// Grid
-		Grid grid(winWidth, winHeight);
-		grid.SetUpPositions();
-
-		// VAO
-		VertexArray va;
-		
-		// VBO
-		float* positions = grid.GetPositions();
-
-		VertexBuffer vb(positions, grid.GetPositionsSize() * sizeof(float));
-
-		VertexBufferLayout layout;
-		layout.Push<float>(2);
-
-		//va.AddBuffer(vb, layout);
-
-		// index buffer IBO
-		//IndexBuffer ib(indices, 6);
-
-		glm::mat4 proj = glm::ortho(0.0f, (float)winWidth, 0.0f, (float)winHeight, -1.0f, 1.0f);
-
-		// Bind shader
-		Shader shader("res/shaders/Basic.shader");
-		shader.Bind();
-		ColorRGBA gridLines = { 0.6f, 0.6f, 0.6f, 1.0f };
-		shader.SetUniformMat4f("u_MVP", proj);
-
-		// Unbound everything
-		va.Unbind();
-		vb.Unbind();
-		//ib.Unbind();
-		shader.Unbind();
-
-		Renderer renderer;
-
-		/*glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-		glEnable(GL_LINE_SMOOTH);*/
-
-
-		// Strip line vertices (first LightCycle)
-		int lightCycleWidth = 7;
-		float lightCycle[] = {
-			100.0f, 100.0f,
-			100.0f, 150.0f,
-			300.0f, 150.0f,
-			300.0f, 500.0f,
-			320.0f, 500.0f,
-			320.0f, 650.0f
-		};
-		VertexBuffer vb2(lightCycle, 12 * sizeof(float));
-		VertexBufferLayout layout2;
-		layout2.Push<float>(2);
-		shader.Bind();
-		ColorRGBA red = { 1.0f, 0.0f, 0.0f, 1.0f };
-		//
-		// Strip line vertices (second  LightCycle)
-		float lightCycle2[] = {
-			1000.0f, 1000.0f,
-			1000.0f, 960.0f,
-			870.0f, 960.0f,
-			870.0f, 1000.0f,
-			700.0f, 1000.0f,
-			700.0f, 700.0f
-		};
-		VertexBuffer vb3(lightCycle2, 12 * sizeof(float));
-		VertexBufferLayout layout3;
-		layout3.Push<float>(2);
-		shader.Bind();
-		ColorRGBA green = { 0.0f, 1.0f, 0.0f, 1.0f };
-		//
-
-		/* Loop until the user closes the window */
-		while (!glfwWindowShouldClose(window))
-		{
-			// Render here 
-			renderer.Clear();
-
-			// Bind VAO and IB
-			glLineWidth(1);
-			RenderItem(va, shader, vb, layout, gridLines);
-			renderer.DrawLines(va,/*ib,*/ shader, grid.GetPositionsSize() / 2);
-
-			// Light Cycle Red
-			glLineWidth(lightCycleWidth);
-			RenderItem(va, shader, vb2, layout2, red);
-			renderer.DrawLineStrip(va, shader, 6);
-
-			// Light Cycle Green
-			RenderItem(va, shader, vb3, layout3, green);
-			renderer.DrawLineStrip(va, shader, 6);
-
-			/* Swap front and back buffers */
-			glfwSwapBuffers(window);
-
-			/* Poll for and process events */
-			glfwPollEvents();
-		}
-	}
-
-	glfwTerminate();
-	return 0;
+    return result;
 }
 
-void RenderItem(VertexArray& va, Shader& shader,const VertexBuffer& vb,const VertexBufferLayout& vbl,const ColorRGBA& color) {
-	va.AddBuffer(vb, vbl);
-	shader.Bind();
-	shader.SetUniform4f("u_Color", color.r, color.g, color.b, color.alpha);
+static ShaderProgramSource ParseShader(const std::string& vertexFilePath, const std::string& fragmentFilePath)
+{
+    ShaderProgramSource shaderProgram;
+
+    shaderProgram.VertexSource = ReadFile(vertexFilePath);
+    shaderProgram.FragmentSource = ReadFile(fragmentFilePath);
+
+    return shaderProgram;
+}
+
+static GLuint CompileShader(GLenum type, const std::string& source)
+{
+    GLuint shaderId = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(shaderId, 1, &src, nullptr);
+    glCompileShader(shaderId);
+
+    GLint isCompiled = 0;
+    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &isCompiled);
+
+    if (isCompiled == GL_FALSE)
+    {
+        GLint maxLength = 0;
+        glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> infoLog(maxLength);
+        glGetShaderInfoLog(shaderId, maxLength, &maxLength, &infoLog[0]);
+
+        glDeleteShader(shaderId);
+
+        std::cout << "Failed shader compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader:" << std::endl;
+        std::cout << std::string(infoLog.data()) << std::endl;
+
+        return -1;
+    }
+
+    return shaderId;
+}
+
+static GLuint CreateShader(const ShaderProgramSource shaderProgramSource)
+{
+    GLuint program = glCreateProgram();
+    GLuint vs = CompileShader(GL_VERTEX_SHADER, shaderProgramSource.VertexSource);
+    GLuint fs = CompileShader(GL_FRAGMENT_SHADER, shaderProgramSource.FragmentSource);
+
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+
+    GLint isLinked = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
+    if (isLinked == GL_FALSE)
+    {
+        GLint maxLength = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> infoLog(maxLength);
+        glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+
+        glDeleteProgram(program);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+
+        std::cout << "Failed program lingking:" << std::endl;
+        std::cout << std::string(infoLog.data()) << std::endl;
+
+        return -1;
+    }
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+
+    return program;
+}
+
+void OpenGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:
+        CRITICAL(message);
+        TR_ASSERT(false);
+        return;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        ERROR(message);
+        return;
+    case GL_DEBUG_SEVERITY_LOW:
+        WARN(message);
+        return;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        INFO(message);
+        return;
+    }
+
+    TR_ASSERT(false, "Unknown severity level!");
+}
+
+int main()
+{
+    if (!glfwInit())
+    {
+        std::cout << "Failed to initialize GLFW!" << std::endl;
+        TR_ASSERT(false);
+        return -1;
+    }
+
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Tron", nullptr, nullptr);
+    if (!window)
+    {
+        std::cout << "Failed to create window" << std::endl;
+        glfwTerminate();
+        TR_ASSERT(false);
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // vsync
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize Glad!" << std::endl;
+        TR_ASSERT(false);
+        return -1;
+    }
+
+    // Enable opengl debug
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+
+    // Info about graphics vendor
+    std::cout << "OpenGL info:" << std::endl;
+    std::cout << " Vendor:" << glGetString(GL_VENDOR) << std::endl;
+    std::cout << " Renderer:" << glGetString(GL_RENDERER) << std::endl;
+    std::cout << " Version:" << glGetString(GL_VERSION) << std::endl;
+
+    // Set GLFW callbacks
+    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mode) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
+    });
+    //---------------
+
+    float positions[] = {
+        -0.5f, -0.5f,
+        -0.5f, 0.5f,
+        0.5f, 0.5f,
+        0.5f, -0.5f
+    };
+
+    uint32_t indices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    VertexArray va;
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    VertexBufferLayout vbLayout = {
+        {BufferAttributeType::Float2}
+    };
+    vb.SetLayout(vbLayout);
+    va.AddVertexBuffer(&vb);
+
+    IndexBuffer ib(indices, 6);
+
+    // Shaders
+    ShaderProgramSource source = ParseShader("res/shaders/shader.vert", "res/shaders/shader.frag");
+    GLuint shaderProgram = CreateShader(source);
+    glUseProgram(shaderProgram);
+    // -----
+    int location = glGetUniformLocation(shaderProgram, "u_Color");
+    TR_ASSERT(location != -1);
+    glUniform4f(location, 0.0f, 1.0f, 0.0f, 1.0f);
+
+    //------
+
+    va.Unbind();
+    glUseProgram(0);
+    /*glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glfwPollEvents();
+
+        glUseProgram(shaderProgram);
+        va.Bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+        glfwSwapBuffers(window);
+    }
+
+    glfwTerminate();
+
+    return 0;
 }
