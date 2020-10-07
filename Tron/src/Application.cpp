@@ -4,111 +4,10 @@
 #include "Renderer/VertexBufferLayout.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/VertexArray.h"
+#include "Renderer/Shader.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-
-struct ShaderProgramSource
-{
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-static std::string ReadFile(const std::string& filepath)
-{
-    std::string result;
-    std::ifstream in(filepath, std::ios::in || std::ios::binary);
-    if (in)
-    {
-        in.seekg(0, in.end);
-        result.resize(in.tellg());
-        in.seekg(0, in.beg);
-        in.read(&result[0], result.size());
-        in.close();
-    }
-    else
-    {
-        std::cout << "Could not open file " << filepath << std::endl;
-        TR_ASSERT(false);
-    }
-
-    return result;
-}
-
-static ShaderProgramSource ParseShader(const std::string& vertexFilePath, const std::string& fragmentFilePath)
-{
-    ShaderProgramSource shaderProgram;
-
-    shaderProgram.VertexSource = ReadFile(vertexFilePath);
-    shaderProgram.FragmentSource = ReadFile(fragmentFilePath);
-
-    return shaderProgram;
-}
-
-static GLuint CompileShader(GLenum type, const std::string& source)
-{
-    GLuint shaderId = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(shaderId, 1, &src, nullptr);
-    glCompileShader(shaderId);
-
-    GLint isCompiled = 0;
-    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &isCompiled);
-
-    if (isCompiled == GL_FALSE)
-    {
-        GLint maxLength = 0;
-        glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> infoLog(maxLength);
-        glGetShaderInfoLog(shaderId, maxLength, &maxLength, &infoLog[0]);
-
-        glDeleteShader(shaderId);
-
-        std::cout << "Failed shader compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader:" << std::endl;
-        std::cout << std::string(infoLog.data()) << std::endl;
-
-        return -1;
-    }
-
-    return shaderId;
-}
-
-static GLuint CreateShader(const ShaderProgramSource shaderProgramSource)
-{
-    GLuint program = glCreateProgram();
-    GLuint vs = CompileShader(GL_VERTEX_SHADER, shaderProgramSource.VertexSource);
-    GLuint fs = CompileShader(GL_FRAGMENT_SHADER, shaderProgramSource.FragmentSource);
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-
-    GLint isLinked = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
-    if (isLinked == GL_FALSE)
-    {
-        GLint maxLength = 0;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> infoLog(maxLength);
-        glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-
-        glDeleteProgram(program);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
-
-        std::cout << "Failed program lingking:" << std::endl;
-        std::cout << std::string(infoLog.data()) << std::endl;
-
-        return -1;
-    }
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
 
 void OpenGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -200,20 +99,14 @@ int main()
     IndexBuffer ib(indices, 6);
 
     // Shaders
-    ShaderProgramSource source = ParseShader("res/shaders/shader.vert", "res/shaders/shader.frag");
-    GLuint shaderProgram = CreateShader(source);
-    glUseProgram(shaderProgram);
-    // -----
-    int location = glGetUniformLocation(shaderProgram, "u_Color");
-    TR_ASSERT(location != -1);
-    glUniform4f(location, 0.0f, 1.0f, 0.0f, 1.0f);
+    ShaderManager shaderManager;
+    std::shared_ptr<Shader> shader = shaderManager.Load("PosColorShader", "res/shaders/shader.vert", "res/shaders/shader.frag");
+    shader->Bind();
+    shader->SetVector4f("u_Color", 0.0f, 1.0f, 0.0f, 1.0f);
 
-    //------
-
+    // Unbind all stuff
     va.Unbind();
-    glUseProgram(0);
-    /*glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
+    shader->Unbind();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -221,7 +114,7 @@ int main()
 
         glfwPollEvents();
 
-        glUseProgram(shaderProgram);
+        shader->Bind();
         va.Bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
