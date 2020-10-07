@@ -5,6 +5,7 @@
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -58,7 +59,7 @@ int main()
         return -1;
     }
 
-    // Enable opengl debug
+    // Enable OpenGL debug
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(OpenGLMessageCallback, nullptr);
@@ -89,11 +90,13 @@ int main()
     };
 
     VertexArray va;
+
     VertexBuffer vb(positions, 4 * 2 * sizeof(float));
     VertexBufferLayout vbLayout = {
-        {BufferAttributeType::Float2}
+        { BufferAttributeType::Float2 }
     };
     vb.SetLayout(vbLayout);
+
     va.AddVertexBuffer(&vb);
 
     IndexBuffer ib(indices, 6);
@@ -104,19 +107,15 @@ int main()
     shader->Bind();
     shader->SetVector4f("u_Color", 0.0f, 1.0f, 0.0f, 1.0f);
 
-    // Unbind all stuff
-    va.Unbind();
-    shader->Unbind();
+    Renderer renderer;
 
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        renderer.PreRender();
 
         glfwPollEvents();
 
-        shader->Bind();
-        va.Bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        renderer.Draw(va, ib, shader);
 
         glfwSwapBuffers(window);
     }

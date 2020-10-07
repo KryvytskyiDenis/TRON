@@ -33,12 +33,12 @@ VertexArray::~VertexArray()
 {
 }
 
-void VertexArray::Bind()
+void VertexArray::Bind() const
 {
     glBindVertexArray(m_RendererId);
 }
 
-void VertexArray::Unbind()
+void VertexArray::Unbind() const
 {
     glBindVertexArray(0);
 }
