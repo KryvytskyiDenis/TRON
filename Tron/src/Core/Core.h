@@ -11,6 +11,7 @@
     #define TR_ASSERT(expr, ...) if (expr) {} \
         else \
         { \
+            TR_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
             TR_DEBUGBREAK(); \
         }
 #else

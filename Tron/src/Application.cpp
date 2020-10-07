@@ -15,17 +15,16 @@ void OpenGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severit
     switch (severity)
     {
     case GL_DEBUG_SEVERITY_HIGH:
-        CRITICAL(message);
-        TR_ASSERT(false);
+        TR_CRITICAL(message);
         return;
     case GL_DEBUG_SEVERITY_MEDIUM:
         ERROR(message);
         return;
     case GL_DEBUG_SEVERITY_LOW:
-        WARN(message);
+        TR_WARN(message);
         return;
     case GL_DEBUG_SEVERITY_NOTIFICATION:
-        INFO(message);
+        TR_INFO(message);
         return;
     }
 
@@ -34,19 +33,19 @@ void OpenGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severit
 
 int main()
 {
+    Log::Init();
+
     if (!glfwInit())
     {
-        std::cout << "Failed to initialize GLFW!" << std::endl;
-        TR_ASSERT(false);
+        TR_ASSERT(false, "Failed to initialize GLFW!");
         return -1;
     }
 
     GLFWwindow* window = glfwCreateWindow(640, 480, "Tron", nullptr, nullptr);
     if (!window)
     {
-        std::cout << "Failed to create window" << std::endl;
         glfwTerminate();
-        TR_ASSERT(false);
+        TR_ASSERT(false, "Failed to create window");
         return -1;
     }
     glfwMakeContextCurrent(window);
@@ -54,8 +53,7 @@ int main()
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize Glad!" << std::endl;
-        TR_ASSERT(false);
+        TR_ASSERT(false,"Failed to initialize Glad!");
         return -1;
     }
 
@@ -65,10 +63,7 @@ int main()
     glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 
     // Info about graphics vendor
-    std::cout << "OpenGL info:" << std::endl;
-    std::cout << " Vendor:" << glGetString(GL_VENDOR) << std::endl;
-    std::cout << " Renderer:" << glGetString(GL_RENDERER) << std::endl;
-    std::cout << " Version:" << glGetString(GL_VERSION) << std::endl;
+    TR_INFO("OpenGL info:\n Vendor: {0}\n Renderer: {1}\n Version: {2}", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
     // Set GLFW callbacks
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mode) {

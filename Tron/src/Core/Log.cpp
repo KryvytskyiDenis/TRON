@@ -1,12 +1,13 @@
 #include "trpch.h"
 #include "Core/Log.h"
 
-static const char* level_string_views[]
-{
-    "Trace", "Info", "Warn", "Error", "Critical"
-};
+#include <spdlog/sinks/stdout_color_sinks.h>
 
-void Log::log(LogLevel level, const char* message)
+std::shared_ptr<spdlog::logger> Log::s_Logger;
+
+void Log::Init()
 {
-    std::cout << level_string_views[level] << ": " << message << std::endl;
+    spdlog::set_pattern("%^[%T] %n: %v%$");
+    s_Logger = spdlog::stdout_color_mt("Tron");
+    s_Logger->set_level(spdlog::level::trace);
 }

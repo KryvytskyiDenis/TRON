@@ -18,8 +18,7 @@ static GLenum BufferAttributeTypeToOpenGLBaseType(BufferAttributeType type)
         case BufferAttributeType::Bool: return GL_BOOL;
     }
 
-    ERROR("Unknown BufferttributeType!");
-    TR_ASSERT(false);
+    TR_ASSERT(false, "Unknown BufferAttributeType!");
     return 0;
 }
 

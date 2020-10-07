@@ -14,6 +14,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "%{wks.location}/Tron/dependencies/GLFW/include"
 IncludeDir["Glad"] = "%{wks.location}/Tron/dependencies/Glad/include"
 IncludeDir["glm"] = "%{wks.location}/Tron/dependencies/glm"
+IncludeDir["spdlog"] = "%{wks.location}/Tron/dependencies/spdlog/include"
 
 include "Tron/dependencies/GLFW"
 include "Tron/dependencies/Glad"
@@ -44,7 +45,8 @@ project "Tron"
         "%{prj.name}/src",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.spdlog}"
     }
 
     links

@@ -29,8 +29,7 @@ static uint32_t BufferAttributeTypeSize(BufferAttributeType type)
         case BufferAttributeType::Bool: return sizeof(bool);
     }
 
-    ERROR("Unknown BufferttributeType!");
-    TR_ASSERT(false);
+    TR_ASSERT(false, "Unknown BufferAttributeType!");
     return 0;
 }
 
@@ -60,8 +59,7 @@ struct VertexBufferAttribute
             case BufferAttributeType::Bool: return 1;
         }
 
-        ERROR("Unknown BufferttributeType!");
-        TR_ASSERT(false);
+        TR_ASSERT(false, "Unknown BufferAttributeType!");
         return 0;
     }
 };

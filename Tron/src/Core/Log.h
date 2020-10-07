@@ -1,22 +1,20 @@
 #pragma once
 
-enum LogLevel
-{
-    TRACE,
-    INFO,
-    WARN,
-    ERROR,
-    CRITICAL
-};
+#include <spdlog/spdlog.h>
 
 class Log
 {
 public:
-    static void log(LogLevel level, const char* message);
+    static void Init();
+
+    static std::shared_ptr<spdlog::logger>& GetLogger() { return s_Logger; }
+
+private:
+    static std::shared_ptr<spdlog::logger> s_Logger;
 };
 
-#define TRACE(msg) ::Log::log(LogLevel::TRACE, msg)
-#define INFO(msg) ::Log::log(LogLevel::INFO, msg)
-#define WARN(msg) ::Log::log(LogLevel::WARN, msg)
-#define ERROR(msg) ::Log::log(LogLevel::ERROR, msg)
-#define CRITICAL(msg) ::Log::log(LogLevel::CRITICAL, msg)
+#define TR_TRACE(...)          ::Log::GetLogger()->trace(__VA_ARGS__)
+#define TR_INFO(...)           ::Log::GetLogger()->info(__VA_ARGS__)
+#define TR_WARN(...)           ::Log::GetLogger()->warn(__VA_ARGS__)
+#define TR_ERROR(...)       ::Log::GetLogger()->error(__VA_ARGS__)
+#define TR_CRITICAL(...)       ::Log::GetLogger()->critical(__VA_ARGS__)

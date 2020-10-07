@@ -80,8 +80,7 @@ void Shader::CompileProgram(const ShaderProgramSource& shaderSource)
 
         glDeleteProgram(m_RendererId);
 
-        std::cout << "Failed program lingking:" << std::endl;
-        std::cout << std::string(infoLog.data()) << std::endl;
+        TR_ERROR("Failed program lingking: {0}", infoLog.data());
     }
 
     glDeleteShader(vs);
@@ -108,8 +107,7 @@ GLuint Shader::CompileShader(GLenum type, const std::string& source)
 
         glDeleteShader(shaderId);
 
-        std::cout << "Failed shader compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader:" << std::endl;
-        std::cout << std::string(infoLog.data()) << std::endl;
+        TR_ERROR("Failed shader compile: {0} {1} {2}", type == GL_VERTEX_SHADER ? "vertex" : "fragment", " shader:", infoLog.data());
 
         return -1;
     }
@@ -146,8 +144,7 @@ std::string ShaderManager::ReadFromFile(const std::string& shaderFile)
     }
     else
     {
-        std::cout << "Could not open file " << shaderFile << std::endl;
-        TR_ASSERT(false);
+        TR_ASSERT(false, "Could not open file ");
     }
 
     return result;
