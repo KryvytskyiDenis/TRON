@@ -11,7 +11,9 @@ git clone --recursive https://github.com/kryvytskyidenys/TRON
 - [spdlog](https://github.com/gabime/spdlog)
 - [GLFW](https://github.com/kryvytskyidenys/glfw)
 - [Glad](https://glad.dav1d.de/)
-- [Deat ImGui](https://github.com/kryvytskyidenys/imgui)
+- [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
+- [glm](https://github.com/g-truc/glm)
+
 
 ## Features
 
