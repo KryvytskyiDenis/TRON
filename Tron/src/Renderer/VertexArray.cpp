@@ -54,7 +54,7 @@ void VertexArray::AddVertexBuffer(VertexBuffer* vertexBuffer)
     {
         glEnableVertexAttribArray(vertexAttributeIndex);
         glVertexAttribPointer(vertexAttributeIndex, attribute.GetComponentsCount(), BufferAttributeTypeToOpenGLBaseType(attribute.Type)
-            , attribute.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)offset);
-        offset += attribute.Offset;
+            , attribute.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)attribute.Offset);
+        vertexAttributeIndex++;
     }
 }

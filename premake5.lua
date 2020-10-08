@@ -15,6 +15,7 @@ IncludeDir["GLFW"] = "%{wks.location}/Tron/dependencies/GLFW/include"
 IncludeDir["Glad"] = "%{wks.location}/Tron/dependencies/Glad/include"
 IncludeDir["glm"] = "%{wks.location}/Tron/dependencies/glm"
 IncludeDir["spdlog"] = "%{wks.location}/Tron/dependencies/spdlog/include"
+IncludeDir["stb_image"] = "%{wks.location}/Tron/dependencies/stb_image"
 
 include "Tron/dependencies/GLFW"
 include "Tron/dependencies/Glad"
@@ -37,7 +38,9 @@ project "Tron"
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/dependencies/glm/glm/**.hpp",
-        "%{prj.name}/dependencies/glm/glm/**.inl"
+        "%{prj.name}/dependencies/glm/glm/**.inl",
+        "%{prj.name}/dependencies/stb_image/**.h",
+        "%{prj.name}/dependencies/stb_image/**.cpp"
     }
 
     includedirs
@@ -46,7 +49,8 @@ project "Tron"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.spdlog}"
+        "%{IncludeDir.spdlog}",
+        "%{IncludeDir.stb_image}"
     }
 
     links

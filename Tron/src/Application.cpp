@@ -6,6 +6,7 @@
 #include "Renderer/VertexArray.h"
 #include "Renderer/Shader.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Texture.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -72,22 +73,27 @@ int main()
     });
     //---------------
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     float positions[] = {
-        -0.5f, -0.5f,
-        -0.5f, 0.5f,
-        0.5f, 0.5f,
-        0.5f, -0.5f
+        // pos       // tex
+         -.5f, .5f,  0.0f, 1.0f, // top left
+         0.5f, -.5f, 1.0f, 0.0f, // bottom right
+         -.5f, -.5f, 0.0f, 0.0f, // bottom left
+         .5f, 0.5f,  1.0f, 1.0f // top right
     };
 
     uint32_t indices[] = {
         0, 1, 2,
-        0, 2, 3
+        0, 1, 3
     };
 
     VertexArray va;
 
-    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
     VertexBufferLayout vbLayout = {
+        { BufferAttributeType::Float2 },
         { BufferAttributeType::Float2 }
     };
     vb.SetLayout(vbLayout);
@@ -98,9 +104,20 @@ int main()
 
     // Shaders
     ShaderManager shaderManager;
-    std::shared_ptr<Shader> shader = shaderManager.Load("PosColorShader", "res/shaders/shader.vert", "res/shaders/shader.frag");
+    std::shared_ptr<Shader> shader = shaderManager.Load("PosColorTexShader", "res/shaders/shader.vert", "res/shaders/shader.frag");
     shader->Bind();
     shader->SetVector4f("u_Color", 0.0f, 1.0f, 0.0f, 1.0f);
+
+    // Textures
+    Texture texture("res/textures/wizzard.png");
+    texture.Bind();
+    // set the number of texture slot
+    shader->SetInteger("u_Texture", 0);
+
+    va.Unbind();
+    vb.Unbind();
+    ib.Unbind();
+    shader->Unbind();
 
     Renderer renderer;
 

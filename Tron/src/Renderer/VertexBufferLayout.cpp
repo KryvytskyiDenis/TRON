@@ -28,6 +28,6 @@ void VertexBufferLayout::CalculateOffsetsAndStride()
     {
         attribute.Offset = offset;
         offset += attribute.Size;
-        m_Stride += offset;
+        m_Stride += attribute.Size;
     }
 }
