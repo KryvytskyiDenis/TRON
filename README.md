@@ -1,5 +1,6 @@
 # TRON
-OpenGL 2D Renderer and simple game on top of this
+OpenGL core library.
+Sandbox for testing different features and my custom libraries.
 
 ## Getting started
 
